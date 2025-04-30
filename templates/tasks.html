@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Your Tasks</h2>
+<table class="table">
+  <thead><tr><th>Title</th><th>Due</th><th>Priority</th><th>Category</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for t in tasks %}
+    <tr>
+      <td>{{ t.title }}</td>
+      <td>{{ t.due_date.strftime('%Y-%m-%d') }}</td>
+      <td>{{ t.priority }}</td>
+      <td>{{ t.category }}</td>
+      <td>
+        <form action="{{ url_for('main.edit_task', tid=t.id) }}" method="post" style="display:inline;">
+          <!-- inputs omitted for brevity -->
+          <button class="btn btn-sm btn-warning">Edit</button>
+        </form>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('main.delete_task', tid=t.id) }}">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h3>Add New Task</h3>
+<form action="{{ url_for('main.add_task') }}" method="post">
+  <!-- form fields for title, description, due_date, priority, category -->
+  <button class="btn btn-success mt-2">Add Task</button>
+</form>
+{% endblock %}

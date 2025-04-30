@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center">
+  <h2>Login via GitHub</h2>
+  <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Log in with GitHub</a>
+</div>
+{% endblock %}
