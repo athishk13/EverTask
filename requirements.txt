@@ -1,6 +1,5 @@
-Flask
-Flask-SQLAlchemy
-Flask-Migrate
-Flask-Dance[github]
 python-dotenv
 psycopg2-binary
+matplotlib~=3.10.1
+SQLAlchemy~=2.0.40
+bcrypt~=4.3.0
