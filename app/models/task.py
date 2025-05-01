@@ -1,4 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy.orm import relationship
+
 from database.db import Base
 
 class Task(Base):
@@ -11,3 +13,5 @@ class Task(Base):
     due_date = Column(Date, nullable=False)
     priority = Column(Integer, nullable=False)
     category = Column(String, nullable=False)
+
+    owner = relationship("User", back_populates="tasks")
