@@ -18,7 +18,7 @@ class TaskListFrame(tk.Frame):
         toolbar = ttk.Frame(self)
         toolbar.pack(fill='x')
         ttk.Button(toolbar, text="Add Task", command=self.add_task).pack(side='left', padx=5)
-        ttk.Button(toolbar, text="Edit Task", command=self.add_task).pack(side='left')
+        ttk.Button(toolbar, text="Edit Task", command=self.edit_task).pack(side='left')
         ttk.Button(toolbar, text="Delete Task", command=self.add_task).pack(side='left', padx=5)
         ttk.Button(toolbar, text="Report", command=self.add_task).pack(side='right', padx=5)
 
@@ -71,6 +71,15 @@ class TaskListFrame(tk.Frame):
             self.master.db.delete(task)
             self.master.db.commit()
             self.refresh_tasks()
+
+    def get_selected_task(self):
+        sel = self.tree.selection()
+        if not sel:
+            messagebox.showwarning("Warning", "No task selected.")
+            return None
+        task_id = sel[0]
+        return self.master.db.query(Task).filter(Task.task_id == task_id).first()
+
 
     def sort_by(self, col):
         keymap = {'Title': lambda t: t.title,
@@ -155,7 +164,7 @@ class TaskDialog(tk.Toplevel):
             self.task.title = self.title_var.get().strip()
             self.task.description = self.desc_var.get().strip()
             self.task.due_date = datetime.fromisoformat(self.due_var.get()).date()
-            self.task.priority = self.prio_var.get()
+            self.task.priority = int(self.prio_var.get())
             self.task.category = self.cat_var.get().strip() or "General"
 
         self.session.commit()
