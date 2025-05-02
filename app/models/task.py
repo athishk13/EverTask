@@ -6,7 +6,7 @@ from database.db import Base
 class Task(Base):
     __tablename__ = 'tasks'
 
-    task_id = Column(Integer, primary_key=True)
+    task_id = Column(String, primary_key=True)
     title = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.user_id"))
     description = Column(String, nullable=True)
