@@ -19,14 +19,15 @@ class TaskListFrame(tk.Frame):
         toolbar.pack(fill='x')
         ttk.Button(toolbar, text="Add Task", command=self.add_task).pack(side='left', padx=5)
         ttk.Button(toolbar, text="Edit Task", command=self.edit_task).pack(side='left')
-        ttk.Button(toolbar, text="Delete Task", command=self.add_task).pack(side='left', padx=5)
-        ttk.Button(toolbar, text="Report", command=self.add_task).pack(side='right', padx=5)
+        ttk.Button(toolbar, text="Delete Task", command=self.delete_task).pack(side='left', padx=5)
+        ttk.Button(toolbar, text="Report", command=self.show_report).pack(side='right', padx=5)
 
         # Filter by category
         ttk.Label(toolbar, text="Filter:").pack(side='left', padx=(200, 5))
         self.filter_var = tk.StringVar(value="All")
         choices = ["All"] + sorted({task.category for task in self.master.db.query(Task).all()})
         self.filter_menu = ttk.OptionMenu(toolbar, self.filter_var, *choices, command=lambda _: self.refresh_tasks())
+        self.filter_menu.configure(width=10)
         self.filter_menu.pack(side='left')
 
         # Treeview
