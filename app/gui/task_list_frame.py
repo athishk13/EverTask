@@ -1,5 +1,6 @@
 import tkinter as tk
 import uuid
+import threading
 from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -41,9 +42,14 @@ class TaskListFrame(tk.Frame):
         self.refresh_tasks()
 
     def refresh_tasks(self):
-        self.all_tasks = self.master.db.query(Task).all()
-        self.update_filter_menu()
-        self.display_tasks()
+        def load_and_display_tasks():
+            # Query tasks in the background
+            self.all_tasks = self.master.db.query(Task).all()
+            self.update_filter_menu()
+            self.display_tasks()
+
+        # Start the database operation in a new thread
+        threading.Thread(target=load_and_display_tasks, daemon=True).start()
 
     def update_filter_menu(self):
         categories = sorted({task.category for task in self.all_tasks})
@@ -89,9 +95,13 @@ class TaskListFrame(tk.Frame):
     def delete_task(self):
         task = self.get_selected_task()
         if task and messagebox.askyesno("Confirm", "Delete this task?"):
-            self.master.db.delete(task)
-            self.master.db.commit()
-            self.refresh_tasks()
+            def delete_task_in_thread():
+                # Delete task in the background
+                self.master.db.delete(task)
+                self.master.db.commit()
+                self.refresh_tasks()
+
+            threading.Thread(target=delete_task_in_thread, daemon=True).start()
 
     def get_selected_task(self):
         sel = self.tree.selection()
@@ -162,24 +172,27 @@ class TaskDialog(tk.Toplevel):
             messagebox.showerror("Error", "Invalid date format.")
             return
 
-        if not self.task:
-            self.task = Task(
-                task_id=str(uuid.uuid4()),
-                user_id=int(self.master.master.user.user_id),
-                title=self.title_var.get().strip(),
-                description=self.desc_var.get().strip(),
-                due_date=due_date,
-                priority=int(self.prio_var.get()),
-                category=self.cat_var.get().strip() or "General"
-            )
-            self.session.add(self.task)
-        else:
-            self.task.title = self.title_var.get().strip()
-            self.task.description = self.desc_var.get().strip()
-            self.task.due_date = due_date
-            self.task.priority = int(self.prio_var.get())
-            self.task.category = self.cat_var.get().strip() or "General"
+        def save_task_in_thread():
+            if not self.task:
+                self.task = Task(
+                    task_id=str(uuid.uuid4()),
+                    user_id=int(self.master.master.user.user_id),
+                    title=self.title_var.get().strip(),
+                    description=self.desc_var.get().strip(),
+                    due_date=due_date,
+                    priority=int(self.prio_var.get()),
+                    category=self.cat_var.get().strip() or "General"
+                )
+                self.session.add(self.task)
+            else:
+                self.task.title = self.title_var.get().strip()
+                self.task.description = self.desc_var.get().strip()
+                self.task.due_date = due_date
+                self.task.priority = int(self.prio_var.get())
+                self.task.category = self.cat_var.get().strip() or "General"
 
-        self.session.commit()
-        self.master.refresh_tasks()
-        self.destroy()
+            self.session.commit()
+            self.master.refresh_tasks()
+            self.destroy()
+
+        threading.Thread(target=save_task_in_thread, daemon=True).start()
