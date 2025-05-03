@@ -1,17 +1,18 @@
 import tkinter as tk
 import uuid
 from tkinter import ttk, messagebox
-
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
 from datetime import datetime
-
 from models.task import Task
 
 class TaskListFrame(tk.Frame):
     def __init__(self, master):
         super().__init__(master)
+        self.all_tasks = []
+        self.sorted_column = None
+        self.sort_reverse = False
+
         tk.Label(self, text=f"Welcome, {master.user.username}").pack()
 
         # Toolbar
@@ -25,8 +26,7 @@ class TaskListFrame(tk.Frame):
         # Filter by category
         ttk.Label(toolbar, text="Filter:").pack(side='left', padx=(200, 5))
         self.filter_var = tk.StringVar(value="All")
-        choices = ["All"] + sorted({task.category for task in self.master.db.query(Task).all()})
-        self.filter_menu = ttk.OptionMenu(toolbar, self.filter_var, *choices, command=lambda _: self.refresh_tasks())
+        self.filter_menu = ttk.OptionMenu(toolbar, self.filter_var, "All")
         self.filter_menu.configure(width=10)
         self.filter_menu.pack(side='left')
 
@@ -37,28 +37,48 @@ class TaskListFrame(tk.Frame):
             self.tree.heading(c, text=c, command=lambda _c=c: self.sort_by(_c))
             self.tree.column(c, width=150)
         self.tree.pack(fill='both', expand=True, pady=10)
+
         self.refresh_tasks()
 
     def refresh_tasks(self):
+        self.all_tasks = self.master.db.query(Task).all()
+        self.update_filter_menu()
+        self.display_tasks()
+
+    def update_filter_menu(self):
+        categories = sorted({task.category for task in self.all_tasks})
+        menu = self.filter_menu['menu']
+        menu.delete(0, 'end')
+        menu.add_command(label="All", command=lambda: self.set_filter("All"))
+        for cat in categories:
+            menu.add_command(label=cat, command=lambda c=cat: self.set_filter(c))
+
+    def set_filter(self, value):
+        self.filter_var.set(value)
+        self.display_tasks()
+
+    def display_tasks(self):
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        filter_category = self.filter_var.get()
-        tasks_query = self.master.db.query(Task)
+        tasks = self.all_tasks
+        if self.filter_var.get() != "All":
+            tasks = [t for t in tasks if t.category == self.filter_var.get()]
 
-        # Apply category filter if it's not "All"
-        if filter_category != "All":
-            tasks_query = tasks_query.filter_by(category=filter_category)
+        if self.sorted_column:
+            keymap = {
+                'Title': lambda t: t.title,
+                'Due Date': lambda t: datetime.strptime(t.due_date, "%Y-%m-%d") if isinstance(t.due_date, str) else t.due_date,
+                'Priority': lambda t: t.priority,
+                'Category': lambda t: t.category
+            }
+            tasks.sort(key=keymap[self.sorted_column], reverse=self.sort_reverse)
 
-        tasks = tasks_query.all()
-
-        # Insert tasks into the Treeview
         for task in tasks:
             self.tree.insert('', 'end', iid=task.task_id,
                              values=(task.title, task.due_date, task.priority, task.category))
 
     def add_task(self):
-        # Function to open the TaskDialog for adding a new task
         TaskDialog(self, None)
 
     def edit_task(self):
@@ -79,29 +99,21 @@ class TaskListFrame(tk.Frame):
             messagebox.showwarning("Warning", "No task selected.")
             return None
         task_id = sel[0]
-        return self.master.db.query(Task).filter(Task.task_id == task_id).first()
-
+        return next((t for t in self.all_tasks if t.task_id == task_id), None)
 
     def sort_by(self, col):
-        keymap = {'Title': lambda t: t.title,
-                  'Due Date': lambda t: datetime.strptime(t.due_date, "%Y-%m-%d"),
-                  'Priority': lambda t: t.priority,
-                  'Category': lambda t: t.category}
-
-        tasks = sorted(self.master.db.query(Task).all(), key=keymap[col])
-        for row in self.tree.get_children():
-            self.tree.delete(row)
-        for task in tasks:
-            self.tree.insert('', 'end', iid=task.task_id,
-                             values=(task.title, task.due_date, task.priority, task.category))
+        if self.sorted_column == col:
+            self.sort_reverse = not self.sort_reverse
+        else:
+            self.sorted_column = col
+            self.sort_reverse = False
+        self.display_tasks()
 
     def show_report(self):
-        tasks = self.master.db.query(Task).all()
         counts = {}
-        for task in tasks:
+        for task in self.all_tasks:
             counts[task.category] = counts.get(task.category, 0) + 1
 
-        # Pie chart
         fig = Figure(figsize=(4, 4))
         ax = fig.add_subplot(111)
         ax.pie(counts.values(), labels=counts.keys(), autopct='%1.1f%%')
@@ -114,7 +126,7 @@ class TaskListFrame(tk.Frame):
 class TaskDialog(tk.Toplevel):
     def __init__(self, master, task=None):
         super().__init__(master)
-        self.master = master  # master is TaskListFrame
+        self.master = master
         self.task = task
         self.session = self.master.master.db
 
@@ -145,7 +157,7 @@ class TaskDialog(tk.Toplevel):
 
     def _on_save(self):
         try:
-            datetime.fromisoformat(self.due_var.get())
+            due_date = datetime.fromisoformat(self.due_var.get()).date()
         except ValueError:
             messagebox.showerror("Error", "Invalid date format.")
             return
@@ -156,7 +168,7 @@ class TaskDialog(tk.Toplevel):
                 user_id=int(self.master.master.user.user_id),
                 title=self.title_var.get().strip(),
                 description=self.desc_var.get().strip(),
-                due_date=datetime.fromisoformat(self.due_var.get()).date(),
+                due_date=due_date,
                 priority=int(self.prio_var.get()),
                 category=self.cat_var.get().strip() or "General"
             )
@@ -164,11 +176,10 @@ class TaskDialog(tk.Toplevel):
         else:
             self.task.title = self.title_var.get().strip()
             self.task.description = self.desc_var.get().strip()
-            self.task.due_date = datetime.fromisoformat(self.due_var.get()).date()
+            self.task.due_date = due_date
             self.task.priority = int(self.prio_var.get())
             self.task.category = self.cat_var.get().strip() or "General"
 
         self.session.commit()
         self.master.refresh_tasks()
         self.destroy()
-
