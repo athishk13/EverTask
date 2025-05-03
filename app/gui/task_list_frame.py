@@ -32,7 +32,7 @@ class TaskListFrame(tk.Frame):
         self.filter_menu.pack(side='left')
 
         # Treeview
-        cols = ('Title', 'Due Date', 'Priority', 'Category')
+        cols = ('Title', 'Due Date', 'Description', 'Priority', 'Category')
         self.tree = ttk.Treeview(self, columns=cols, show='headings')
         for c in cols:
             self.tree.heading(c, text=c, command=lambda _c=c: self.sort_by(_c))
@@ -75,6 +75,7 @@ class TaskListFrame(tk.Frame):
             keymap = {
                 'Title': lambda t: t.title,
                 'Due Date': lambda t: datetime.strptime(t.due_date, "%Y-%m-%d") if isinstance(t.due_date, str) else t.due_date,
+                'Description': lambda t: (t.description[:47] + '...') if len(t.description) > 50 else t.description,
                 'Priority': lambda t: t.priority,
                 'Category': lambda t: t.category
             }
@@ -82,7 +83,7 @@ class TaskListFrame(tk.Frame):
 
         for task in tasks:
             self.tree.insert('', 'end', iid=task.task_id,
-                             values=(task.title, task.due_date, task.priority, task.category))
+                             values=(task.title, task.due_date, task.description, task.priority, task.category))
 
     def add_task(self):
         TaskDialog(self, None)
