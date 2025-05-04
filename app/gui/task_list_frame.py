@@ -239,43 +239,44 @@ class TaskDialog(tk.Toplevel):
         # Save button
         ttk.Button(self, text="Save", command=self._on_save).grid(row=6, columnspan=2, pady=10)
 
-    # Save function called by save button
     def _on_save(self):
         # Validate the date
         try:
             due_date = datetime.fromisoformat(self.due_var.get()).date()
         except ValueError:
-            messagebox.showerror("Error", "Invalid date format.")
+            messagebox.showerror("Error", "Invalid date format. Use YYYY-MM-DD.")
             return
 
-        # Define save function to thread
+        # Define save function to run in thread
         def save_task_in_thread():
-            # Create a new task
-            if not self.task:
-                self.task = Task(
-                    task_id=str(uuid.uuid4()),
-                    user_id=int(self.master.master.user.user_id),
-                    title=self.title_var.get().strip(),
-                    description=self.desc_var.get().strip(),
-                    due_date=due_date,
-                    priority=int(self.prio_var.get()),
-                    category=self.cat_var.get().strip() or "General",
-                    complete=self.comp_var.get()
-                )
-                self.session.add(self.task)
-            # Modify the existing task
-            else:
-                self.task.title = self.title_var.get().strip()
-                self.task.description = self.desc_var.get().strip()
-                self.task.due_date = due_date
-                self.task.priority = int(self.prio_var.get())
-                self.task.category = self.cat_var.get().strip() or "General"
-                self.task.complete = self.comp_var.get()
+            try:
+                if not self.task:
+                    self.task = Task(
+                        task_id=str(uuid.uuid4()),
+                        user_id=int(self.master.master.user.user_id),
+                        title=self.title_var.get().strip(),
+                        description=self.desc_var.get().strip(),
+                        due_date=due_date,
+                        priority=int(self.prio_var.get()),
+                        category=self.cat_var.get().strip() or "General",
+                        complete=self.comp_var.get()
+                    )
+                    self.session.add(self.task)
+                else:
+                    self.task.title = self.title_var.get().strip()
+                    self.task.description = self.desc_var.get().strip()
+                    self.task.due_date = due_date
+                    self.task.priority = int(self.prio_var.get())
+                    self.task.category = self.cat_var.get().strip() or "General"
+                    self.task.complete = self.comp_var.get()
 
-            # Save changes and destroy the window
-            self.session.commit()
-            self.master.refresh_tasks()
-            self.destroy()
+                self.session.commit()
+                self.master.after(0, self.master.refresh_tasks)
+                self.master.after(0, self.destroy)
 
-        # Thread
+            except Exception as e:
+                self.session.rollback()
+                self.master.after(0, lambda: messagebox.showerror("Error", f"Could not save task:"))
+
         threading.Thread(target=save_task_in_thread, daemon=True).start()
+
