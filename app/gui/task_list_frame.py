@@ -34,9 +34,23 @@ class TaskListFrame(tk.Frame):
         # Treeview
         cols = ('✓/x', 'Title', 'Due Date', 'Description', 'Priority', 'Category')
         self.tree = ttk.Treeview(self, columns=cols, show='headings')
-        for c in cols:
-            self.tree.heading(c, text=c, command=lambda _c=c: self.sort_by(_c))
-            self.tree.column(c, width=150)
+
+        # Set specific width for each column
+        self.tree.column('✓/x', width=50, anchor="c")
+        self.tree.column('Title', width=150)
+        self.tree.column('Due Date', width=150)
+        self.tree.column('Description', width=300)
+        self.tree.column('Priority', width=70, anchor="c")
+        self.tree.column('Category', width=150)
+
+        # Set column headings
+        self.tree.heading('✓/x', text='✓/x', command=lambda: self.sort_by('✓/x'))
+        self.tree.heading('Title', text='Title', command=lambda: self.sort_by('Title'))
+        self.tree.heading('Due Date', text='Due Date', command=lambda: self.sort_by('Due Date'))
+        self.tree.heading('Description', text='Description', command=lambda: self.sort_by('Description'))
+        self.tree.heading('Priority', text='Priority', command=lambda: self.sort_by('Priority'))
+        self.tree.heading('Category', text='Category', command=lambda: self.sort_by('Category'))
+
         self.tree.pack(fill='both', expand=True, pady=10)
 
         self.tree.bind("<Double-1>", self.toggle_complete)
@@ -88,7 +102,7 @@ class TaskListFrame(tk.Frame):
                 '✓/x': lambda t: t.complete,
                 'Title': lambda t: t.title,
                 'Due Date': lambda t: datetime.strptime(t.due_date, "%Y-%m-%d") if isinstance(t.due_date, str) else t.due_date,
-                'Description': lambda t: (t.description[:47] + '...') if len(t.description) > 50 else t.description,
+                'Description': lambda t: (t.description[:42] + '...') if len(t.description) > 45 else t.description,
                 'Priority': lambda t: t.priority,
                 'Category': lambda t: t.category
             }
@@ -172,15 +186,15 @@ class TaskDialog(tk.Toplevel):
 
         ttk.Label(self, text="Priority (1-5):").grid(row=3, column=0, sticky='e')
         self.prio_var = tk.IntVar(value=task.priority if task else 3)
-        ttk.Spinbox(self, from_=1, to=5, textvariable=self.prio_var).grid(row=3, column=1)
+        ttk.Entry(self, textvariable=self.prio_var).grid(row=3, column=1)
 
         ttk.Label(self, text="Category:").grid(row=4, column=0, sticky='e')
         self.cat_var = tk.StringVar(value=task.category if task else "General")
         ttk.Entry(self, textvariable=self.cat_var).grid(row=4, column=1)
 
         ttk.Label(self, text="Completed:").grid(row=5, column=0, sticky='e')
-        self.comp_var = tk.BooleanVar(value=task.completed if task else False)
-        ttk.Checkbutton(self, variable=self.comp_var).grid(row=5, column=1, sticky='w')
+        self.comp_var = tk.BooleanVar(value=task.complete if task else False)
+        ttk.Checkbutton(self, variable=self.comp_var).grid(row=5, column=1, sticky='w', padx=(2, 0))
 
         ttk.Button(self, text="Save", command=self._on_save).grid(row=6, columnspan=2, pady=10)
 
