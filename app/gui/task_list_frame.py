@@ -189,7 +189,8 @@ class TaskListFrame(tk.Frame):
     def show_report(self):
         counts = {}
         for task in self.all_tasks:
-            counts[task.category] = counts.get(task.category, 0) + 1
+            category = "Complete" if task.complete else task.category
+            counts[category] = counts.get(category, 0) + 1
 
         fig = Figure(figsize=(4, 4))
         ax = fig.add_subplot(111)
