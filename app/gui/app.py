@@ -6,7 +6,7 @@ from gui.login_frame import LoginFrame
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Task Manager")
+        self.title("EverTask")
         init_db()
         self.db = SessionLocal()
         self.user = None
