@@ -32,14 +32,26 @@ class TaskListFrame(tk.Frame):
         self.filter_menu.pack(side='left')
 
         # Treeview
-        cols = ('Title', 'Due Date', 'Description', 'Priority', 'Category')
+        cols = ('✓/x', 'Title', 'Due Date', 'Description', 'Priority', 'Category')
         self.tree = ttk.Treeview(self, columns=cols, show='headings')
         for c in cols:
             self.tree.heading(c, text=c, command=lambda _c=c: self.sort_by(_c))
             self.tree.column(c, width=150)
         self.tree.pack(fill='both', expand=True, pady=10)
 
+        self.tree.bind("<Double-1>", self.toggle_complete)
+
         self.refresh_tasks()
+
+    def toggle_complete(self, event):
+        item = self.tree.identify_row(event.y)
+        column = self.tree.identify_column(event.x)
+        if item and column == '#1':  # "#1" = first column (Complete)
+            task = next((t for t in self.all_tasks if t.task_id == item), None)
+            if task:
+                task.complete = not task.complete
+                self.master.db.commit()
+                self.refresh_tasks()
 
     def refresh_tasks(self):
         def load_and_display_tasks():
@@ -73,6 +85,7 @@ class TaskListFrame(tk.Frame):
 
         if self.sorted_column:
             keymap = {
+                '✓/x': lambda t: t.complete,
                 'Title': lambda t: t.title,
                 'Due Date': lambda t: datetime.strptime(t.due_date, "%Y-%m-%d") if isinstance(t.due_date, str) else t.due_date,
                 'Description': lambda t: (t.description[:47] + '...') if len(t.description) > 50 else t.description,
@@ -82,8 +95,9 @@ class TaskListFrame(tk.Frame):
             tasks.sort(key=keymap[self.sorted_column], reverse=self.sort_reverse)
 
         for task in tasks:
+            complete_text = "✓" if task.complete else "x"
             self.tree.insert('', 'end', iid=task.task_id,
-                             values=(task.title, task.due_date, task.description, task.priority, task.category))
+                             values=(complete_text, task.title, task.due_date, task.description, task.priority, task.category))
 
     def add_task(self):
         TaskDialog(self, None)
@@ -164,7 +178,11 @@ class TaskDialog(tk.Toplevel):
         self.cat_var = tk.StringVar(value=task.category if task else "General")
         ttk.Entry(self, textvariable=self.cat_var).grid(row=4, column=1)
 
-        ttk.Button(self, text="Save", command=self._on_save).grid(row=5, columnspan=2, pady=10)
+        ttk.Label(self, text="Completed:").grid(row=5, column=0, sticky='e')
+        self.comp_var = tk.BooleanVar(value=task.completed if task else False)
+        ttk.Checkbutton(self, variable=self.comp_var).grid(row=5, column=1, sticky='w')
+
+        ttk.Button(self, text="Save", command=self._on_save).grid(row=6, columnspan=2, pady=10)
 
     def _on_save(self):
         try:
@@ -182,7 +200,8 @@ class TaskDialog(tk.Toplevel):
                     description=self.desc_var.get().strip(),
                     due_date=due_date,
                     priority=int(self.prio_var.get()),
-                    category=self.cat_var.get().strip() or "General"
+                    category=self.cat_var.get().strip() or "General",
+                    complete=self.comp_var.get()
                 )
                 self.session.add(self.task)
             else:
@@ -191,6 +210,7 @@ class TaskDialog(tk.Toplevel):
                 self.task.due_date = due_date
                 self.task.priority = int(self.prio_var.get())
                 self.task.category = self.cat_var.get().strip() or "General"
+                self.task.complete = self.comp_var.get()
 
             self.session.commit()
             self.master.refresh_tasks()
