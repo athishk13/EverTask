@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from database.db import Base
+from app.database.db import Base
 
 # User table, inherits from ORM Base class
 class User(Base):

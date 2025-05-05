@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean
 from sqlalchemy.orm import relationship
 
-from database.db import Base
+from app.database.db import Base
 
 # Task table, inherits from ORM Base class
 class Task(Base):

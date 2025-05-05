@@ -1,5 +1,5 @@
 import tkinter as tk
-from utils.auth import create_user
+from app.utils.auth import create_user
 
 # Register Frame, inherits from tk.Frame
 class RegisterFrame(tk.Frame):

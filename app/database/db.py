@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 DATABASE_URL = "sqlite:///task_manager.db"
 
 # Create engine and bind the session
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(bind=engine)
 
 # ORM base class
@@ -14,6 +14,6 @@ Base = declarative_base()
 
 # Import the user and task table classes, then create the tables
 def init_db():
-    from models.task import Task
-    from models.user import User
+    from app.models.task import Task
+    from app.models.user import User
     Base.metadata.create_all(bind=engine)

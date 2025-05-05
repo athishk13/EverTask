@@ -5,7 +5,7 @@ from tkinter import ttk, messagebox
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from datetime import datetime
-from models.task import Task
+from app.models.task import Task
 
 # Main tasks frame, inherits from tk.Frame
 class TaskListFrame(tk.Frame):

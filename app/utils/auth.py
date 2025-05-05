@@ -1,6 +1,6 @@
 import bcrypt
 from sqlalchemy.orm import Session
-from models.user import User
+from app.models.user import User
 from sqlalchemy.exc import IntegrityError
 
 # Create user function with authentication

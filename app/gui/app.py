@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from database.db import init_db, SessionLocal
-from gui.login_frame import LoginFrame
+from app.database.db import init_db, SessionLocal
+
 
 # Main Tkinter application, switches between frames to display
 class App(tk.Tk):
@@ -47,17 +47,17 @@ class App(tk.Tk):
 
     # Switch active view to the login frame
     def switch_to_login(self):
-        from gui.login_frame import LoginFrame
+        from app.gui.login_frame import LoginFrame
         self._switch_frame(LoginFrame)
 
     # Switch active view to the register frame
     def switch_to_register(self):
-        from gui.register_frame import RegisterFrame
+        from app.gui.register_frame import RegisterFrame
         self._switch_frame(RegisterFrame)
 
     # Switch active view to the tasks frame
     def switch_to_tasks(self):
-        from gui.task_list_frame import TaskListFrame
+        from app.gui.task_list_frame import TaskListFrame
         self._switch_frame(TaskListFrame)
 
     # Helper function for switching frames

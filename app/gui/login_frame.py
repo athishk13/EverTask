@@ -1,5 +1,5 @@
 import tkinter as tk
-from utils.auth import authenticate
+from app.utils.auth import authenticate
 
 # Login Frame class, inherits from tk.Frame
 class LoginFrame(tk.Frame):
