@@ -1,0 +1,7 @@
+bcrypt==4.3.0
+matplotlib==3.10.1
+numpy==2.2.5
+python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
+SQLAlchemy==2.0.40
+pyinstaller==6.13.0
