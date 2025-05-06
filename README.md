@@ -75,12 +75,12 @@ EverTask/
 │ │ └── task_list_frame.py
 │ ├── models/                   # SQLAlchemy tables
 │ │ ├── init.py
-│ │ ├── task_logic.py
-│ │ └── test_task_logic.py
+│ │ ├── task.py
+│ │ └── user.py
 │ ├── testing/                  # Unit tests
 │ │ ├── init.py
-│ │ ├── app.py
-│ │ ├── login_frame.py
+│ │ ├── task_logic.py
+│ │ ├── test_task_logic.py
 │ ├── utils/                    # Utility functions
 │ │ ├── init.py
 │ │ └── auth.py
