@@ -1,3 +1,0 @@
-([('main',
-   '/Users/tiger/PycharmProjects/CS122/EverTask/dist/main',
-   'EXECUTABLE')],)
