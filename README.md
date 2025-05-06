@@ -36,16 +36,17 @@ cd EverTask
 pip install -r requirements.txt
 ```
 
-### 3. Compile the distributable
+### 3.1. (Option 1) Compile and run the Evertask distributable
 
 ```bash
 pyinstaller --onefile --windowed app/main.py
+open dist/main
 ```
 
-### 4. Launch Evertask
+### 3.2. (Option 2) Launch Evertask directly
 
 ```bash
-open dist/main
+python3 app/main.py
 ```
 
 ## FIle Structure Overview
@@ -76,8 +77,9 @@ EverTask/
 └── requirements.txt            # Python dependencies
 ```
 
-## Known Bugs
+## Known Bugs / Shortcomings
 - Pyinstaller executables open a console window even when run using --windowed, --noconsole, or console=False in .spec file
+- Unit-testing is incompatible with Tkinter. All functions are rewritten in testing to replicate exact functionality just without the gui elements. Extenstive manual gui testing was performed. 
 
 
 

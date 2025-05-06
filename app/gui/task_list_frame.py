@@ -7,8 +7,8 @@ from matplotlib.figure import Figure
 from datetime import datetime
 from app.models.task import Task
 
-# Main tasks frame, inherits from tk.Frame
 class TaskListFrame(tk.Frame):
+    """Main tasks frame. Inherits from tk.Frame"""
     def __init__(self, master):
         # Links to master window
         super().__init__(master)
@@ -65,8 +65,8 @@ class TaskListFrame(tk.Frame):
         # Refresh the display
         self.refresh_tasks()
 
-    # Bound to double-click action
     def toggle_complete(self, event):
+        """Toggles complete status. Bound to double-click action. Input: event action."""
         # Check location of double-click
         item = self.tree.identify_row(event.y)
         column = self.tree.identify_column(event.x)
@@ -78,8 +78,8 @@ class TaskListFrame(tk.Frame):
                 self.master.db.commit()
                 self.refresh_tasks()
 
-    # Refresh tasks, threaded to prevent mainloop blocking
     def refresh_tasks(self):
+        """Refresh the list of tasks, threaded to prevent mainloop blocking."""
         # Define function to be threaded
         def load_and_display_tasks():
             # Query tasks
@@ -92,8 +92,8 @@ class TaskListFrame(tk.Frame):
         # Start the database operation in a new thread, auto close thread
         threading.Thread(target=load_and_display_tasks, daemon=True).start()
 
-    # Update the filter menu
     def update_filter_menu(self):
+        """Update the filter menu, Fills dropdown with all unique categories."""
         categories = sorted({task.category for task in self.all_tasks})
         menu = self.filter_menu['menu']
         menu.delete(0, 'end')
@@ -101,13 +101,13 @@ class TaskListFrame(tk.Frame):
         for cat in categories:
             menu.add_command(label=cat, command=lambda c=cat: self.set_filter(c))
 
-    # Set the filter
     def set_filter(self, value):
+        """Set the filter, changes the current filter category to display correctly. Input: filter category."""
         self.filter_var.set(value)
         self.display_tasks()
 
-    # Refresh the display
     def display_tasks(self):
+        """Refresh the tree view display with tasks"""
         # Remove all tasks from the tree
         for row in self.tree.get_children():
             self.tree.delete(row)
@@ -137,18 +137,18 @@ class TaskListFrame(tk.Frame):
             self.tree.insert('', 'end', iid=task.task_id,
                              values=(complete_text, task.title, task.due_date, task.description, task.priority, task.category))
 
-    # Open window to add Task
     def add_task(self):
+        """Open window to add Task."""
         TaskDialog(self, None)
 
-    # Open window to edit currently selected Task
     def edit_task(self):
+        """Open window to edit currently selected Task"""
         task = self.get_selected_task()
         if task:
             TaskDialog(self, task)
 
-    # Delete the currently selected task, threaded to prevent blocking
     def delete_task(self):
+        """Delete the currently selected task, threaded to prevent blocking"""
         task = self.get_selected_task()
         # Open confirmation popup window
         if task and messagebox.askyesno("Confirm", "Delete this task?"):
@@ -161,8 +161,8 @@ class TaskListFrame(tk.Frame):
             # Thread the delete operation
             threading.Thread(target=delete_task_in_thread, daemon=True).start()
 
-    # Helper function to get the selected task
     def get_selected_task(self):
+        """Helper function to get the selected task from treeview selection."""
         sel = self.tree.selection()
         # If no selection, display a warning popup window
         if not sel:
@@ -173,8 +173,8 @@ class TaskListFrame(tk.Frame):
         # Return the corresponding task to the unique task_id
         return next((t for t in self.all_tasks if t.task_id == task_id), None)
 
-    # Sorting task function
     def sort_by(self, col):
+        """Helper function that determines the next state of the sort function. Input: column to sort"""
         # Toggle the sorted by status according to the column
         if self.sorted_column == col:
             self.sort_reverse = not self.sort_reverse
@@ -185,8 +185,8 @@ class TaskListFrame(tk.Frame):
         # Refresh the display
         self.display_tasks()
 
-    # Display the category distribution pie chart
     def show_report(self):
+        """Display the category distribution pie chart"""
         counts = {}
         for task in self.all_tasks:
             category = "Complete" if task.complete else task.category
@@ -201,9 +201,10 @@ class TaskListFrame(tk.Frame):
         canvas.draw()
         canvas.get_tk_widget().pack()
 
-# Popup window for adding and editing tasks
 class TaskDialog(tk.Toplevel):
+    """TaskDialog class. Popup window for adding and editing tasks. Inherits from tk.TopLevel."""
     def __init__(self, master, task=None):
+        """Init for TaskDialog class. Input: Task list Frame, selected task (optional)."""
         # Link to tasks frame
         super().__init__(master)
         self.master = master
@@ -241,15 +242,15 @@ class TaskDialog(tk.Toplevel):
         ttk.Button(self, text="Save", command=self._on_save).grid(row=6, columnspan=2, pady=10)
 
     def _on_save(self):
-        # Validate the date
+        """Validate the date in the entry form"""
         try:
             due_date = datetime.fromisoformat(self.due_var.get()).date()
         except ValueError:
             messagebox.showerror("Error", "Invalid date format. Use YYYY-MM-DD.")
             return
 
-        # Define save function to run in thread
         def save_task_in_thread():
+            """Helper function. Save function to run in thread"""
             try:
                 if not self.task:
                     self.task = Task(

@@ -11,7 +11,7 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 from app.gui.app import App
 
-# Start the App and its tkinter mainloop
 if __name__ == "__main__":
+    """Main entry point. Start the App and its tkinter mainloop"""
     app = App()
     app.mainloop()

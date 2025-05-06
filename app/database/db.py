@@ -12,8 +12,8 @@ SessionLocal = sessionmaker(bind=engine)
 # ORM base class
 Base = declarative_base()
 
-# Import the user and task table classes, then create the tables
 def init_db():
+    """Database initialization: create Task and User tables"""
     from app.models.task import Task
     from app.models.user import User
     Base.metadata.create_all(bind=engine)

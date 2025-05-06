@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 
 from app.database.db import Base
 
-# User table, inherits from ORM Base class
 class User(Base):
+    """User table, inherits from ORM Base class."""
     # Table name
     __tablename__ = 'users'
 

@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from sqlalchemy.exc import IntegrityError
 
-# Create user function with authentication
 def create_user(session: Session, username: str, password: str):
+    """Create user function. Hashes password for security. Input: session, username, password."""
     # Strip whitespaces from username
     username = username.strip()
     # Get the password hash
@@ -22,8 +22,8 @@ def create_user(session: Session, username: str, password: str):
         session.rollback()
         return False
 
-# Authenticate login function
 def authenticate(session: Session, username: str, password: str):
+    """Authenticate login function. Input: session, username, password"""
     # Strip whitespaces from username
     username = username.strip()
     # Query User table for username

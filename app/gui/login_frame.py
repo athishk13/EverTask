@@ -1,9 +1,10 @@
 import tkinter as tk
 from app.utils.auth import authenticate
 
-# Login Frame class, inherits from tk.Frame
 class LoginFrame(tk.Frame):
+    """Login Frame class. Inherits from tk.Frame"""
     def __init__(self, master):
+        """Init for LoginFrame class. Input: Main App window."""
         # Links to the master tkinter window
         super().__init__(master)
 
@@ -22,8 +23,8 @@ class LoginFrame(tk.Frame):
         # Register button calls switch_to_register()
         tk.Button(self, text="Register", command=master.switch_to_register).pack()
 
-    # Login function, authenticates user and password before switching to tasks frame
     def login(self):
+        """Login function, authenticates user and password before switching to tasks frame"""
         # Call authenticate helper function in utils
         user = authenticate(self.master.db, self.username.get(), self.password.get())
         # IF valid login, switch to tasks frame
