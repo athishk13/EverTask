@@ -30,26 +30,37 @@ git clone https://github.com/athishk13/EverTask.git
 cd EverTask
 ```
 
-### 2. Install the required dependencies
+### 2. Create a virtual environment (Optional but recommended)
+
+```bash
+python -m venv venv
+
+# Activate on macOS/Linux
+source venv/bin/activate
+# Activate on Windows
+venv\Scripts\activate
+```
+
+### 3. Install the required dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3.1. (Option 1) Compile and run the Evertask distributable
+### 4.1. (Option 1) Compile and run the Evertask distributable
 
 ```bash
 pyinstaller --onefile --windowed app/main.py
 open dist/main
 ```
 
-### 3.2. (Option 2) Launch Evertask directly
+### 4.2. (Option 2) Launch Evertask directly
 
 ```bash
 python3 app/main.py
 ```
 
-## FIle Structure Overview
+## File Structure Overview
 ```text
 EverTask/
 ├── app/                        # Application source code
@@ -71,7 +82,7 @@ EverTask/
 │ │ ├── init.py
 │ │ └── auth.py
 │ ├── init.py
-│ └── main.py                   # Application entry point
+│ ├── main.py                   # Application entry point
 │ └── task_manager.db           # SQLite database file
 ├── README.md                   # Project documentation
 └── requirements.txt            # Python dependencies
