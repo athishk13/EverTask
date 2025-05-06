@@ -72,14 +72,14 @@ EverTask/
 │ │ └── auth.py
 │ ├── init.py
 │ └── main.py                   # Application entry point
-├── task_manager.db             # SQLite database file
+│ └── task_manager.db           # SQLite database file
 ├── README.md                   # Project documentation
 └── requirements.txt            # Python dependencies
 ```
 
 ## Known Bugs / Shortcomings
 - Pyinstaller executables open a console window even when run using --windowed, --noconsole, or console=False in .spec file
-- Unit-testing is incompatible with Tkinter. All functions are rewritten in testing to replicate exact functionality just without the gui elements. Extenstive manual gui testing was performed. 
+- Unit-testing is incompatible with Tkinter. All task functions are rewritten in testing to replicate exact functionality just without the gui elements. Extensive manual gui testing was performed. 
 
 
 
